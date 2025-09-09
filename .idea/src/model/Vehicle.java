@@ -10,4 +10,9 @@ public class Vehicle
         _model = model;
         _year = year;
     }
+
+    public double getCityMpg()
+    {
+        return 0.00;
+    }
 }

@@ -2,8 +2,16 @@
 
 public class FuelCosts
 {
-    private Vehicle _vehicle;
-    private int _mpg;
+    private double _averageGasPrice;
 
+    public FuelCosts(double averageGasPrice)
+    {
+        this._averageGasPrice = averageGasPrice;
+    }
 
+    public int costPerMile(Vehicle vehicle)
+    {
+        return this._averageGasPrice / vehicle.getCityMpg();
+    }
 }
+
