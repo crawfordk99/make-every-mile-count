@@ -5,9 +5,8 @@ Let's see if you're earning enough compared to what you're losing every mile you
 
 As I've been researching for this project, it's a similar idea to GigU, and sites/apps like that, that have been born
 out of the rideshare boom. I want to let drivers know if they're making a profit on delivery runs and how much. 
-I plan on starting small with calculating mileage costs based on city/metro/zip average cost of gas versus how much you made. 
-I am not trying to ruin UberEats/DoorDash platform, I'm simply trying to help drivers be more informed as
-they take rides. The decision to take certain delivery trips can be more complicated than just profit over costs.
+I plan on starting small with calculating mileage costs based on city/metro/zip average cost of gas versus how much you made. I'm simply trying to help drivers be more informed as
+they deliver. The decision to take certain delivery trips can be more complicated than just profit over costs, and varies based on the car you drive.
 
 ## Tech Stack
 
