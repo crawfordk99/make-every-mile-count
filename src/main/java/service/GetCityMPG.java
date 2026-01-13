@@ -39,6 +39,7 @@ public class GetCityMPG
         // Response structure: { "data": [...], "collection": {...} }
         JsonNode dataArray = root.has("data") ? root.get("data") : root;
 
+        // Validate data array
         if (!dataArray.isArray() || dataArray.size() == 0)
         {
             return 0.00;

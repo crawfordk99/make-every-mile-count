@@ -12,8 +12,10 @@ they deliver. The decision to take certain delivery trips can be more complicate
 
 - Java
 
-## APIs
+## APIs/Dependencies
 - [CarAPI](https://carapi.app/api#/)
+- [Jackson](https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind)
+- [Apache POI](https://poi.apache.org/)
 
 ## Future work
 
