@@ -16,6 +16,7 @@ they deliver. The decision to take certain delivery trips can be more complicate
 - [CarAPI](https://carapi.app/api#/)
 - [Jackson](https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind)
 - [Apache POI](https://poi.apache.org/)
+- [EIA API](https://www.eia.gov/opendata/)
 
 ## Future work
 
