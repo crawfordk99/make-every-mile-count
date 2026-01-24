@@ -28,6 +28,7 @@ public class CLI
         String make = promptForMake();
         String model = promptForModel();
         String year = promptForYear();
+        String subModel = promptForSubModel();
 
         // Get region
         Region region = promptForRegion();
@@ -38,7 +39,7 @@ public class CLI
         System.out.println("\nFetching data...\n");
 
         // Calculate and display results
-        calculateAndDisplay(make, model, year, region, gasolineType);
+        calculateAndDisplay(make, model, year, subModel, region, gasolineType);
 
         // Ask if user wants to try another calculation
         if (promptContinue())
@@ -77,7 +78,7 @@ public class CLI
     {
         while (true)
         {
-            System.out.print("Enter vehicle year (2015-2023): ");
+            System.out.print("Enter vehicle year (2015-2020): ");
             String year = scanner.nextLine().trim();
             try
             {
@@ -96,6 +97,12 @@ public class CLI
                 System.out.println("Invalid year. Please enter a 4-digit number.");
             }
         }
+    }
+
+    private String promptForSubModel()
+    {
+        System.out.print("Enter vehicle sub-model (optional, press Enter to skip): ");
+        return scanner.nextLine().trim();
     }
 
     /**
@@ -158,8 +165,8 @@ public class CLI
     {
         System.out.println("\nSelect gasoline type:");
         System.out.println("1. Regular (default)");
-        System.out.println("2. Premium");
-        System.out.println("3. Diesel");
+        System.out.println("2. Medium");
+        System.out.println("3. Premium");
 
         while (true)
         {
@@ -177,8 +184,8 @@ public class CLI
                 switch (choice)
                 {
                     case 1: return "EPMR"; // Regular
-                    case 2: return "EPMPU"; // Premium
-                    case 3: return "EPD2DXL0"; // Diesel
+                    case 2: return "EPMM"; // Medium
+                    case 3: return "EPMP"; // Premium
                     default:
                         System.out.println("Invalid choice. Please enter 1, 2, or 3.");
                 }
@@ -193,7 +200,7 @@ public class CLI
     /**
      * Calculate and display results.
      */
-    private void calculateAndDisplay(String make, String model, String year, Region region, String gasolineType) throws Exception
+    private void calculateAndDisplay(String make, String model, String year, String subModel, Region region, String gasolineType) throws Exception
     {
         try
         {
@@ -204,7 +211,7 @@ public class CLI
             if (mpg == 0.0)
             {
                 System.out.println("ERROR: Could not find MPG data for " + year + " " + make + " " + model);
-                System.out.println("(Note: Data may only be available for 2015-2023 models)");
+                System.out.println("(Note: Data may only be available for 2015-2020 models)");
                 return;
             }
 
@@ -225,12 +232,11 @@ public class CLI
             // Create vehicle and calculate cost per mile
             model.Vehicle v = new model.Vehicle(make, model, year);
             v.setCityMpg(mpg);
-
             model.FuelCosts fc = new model.FuelCosts(gasPrice);
             double costPerMile = fc.costPerMile(v);
 
             System.out.println("\n=== RESULTS ===");
-            System.out.println("Vehicle: " + year + " " + make + " " + model);
+            System.out.println("Vehicle: " + year + " " + make + " " + model + " " + subModel);
             System.out.println("City MPG: " + mpg);
             System.out.println("Gas Price: $" + String.format("%.2f", gasPrice) + "/gal (" + getGasolineTypeName(gasolineType) + ")");
             System.out.println("Region: " + region.getDisplayName());
