@@ -7,8 +7,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+// import java.time.LocalDate;
+// import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -51,17 +51,15 @@ public class GetAverageGasPrice
         }
 
         // Build query parameters for recent weekly data
-        LocalDate endDate = LocalDate.now();
-        LocalDate startDate = endDate.minusDays(30); // Look back 30 days
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        // LocalDate endDate = LocalDate.now();
+        // LocalDate startDate = endDate.minusDays(30); // Look back 30 days
+        // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         // Build URL with proper encoding
         StringBuilder urlBuilder = new StringBuilder(EIA_BASE_URL);
         urlBuilder.append("?frequency=weekly");
         urlBuilder.append("&data[0]=value");
         urlBuilder.append("&facets[duoarea][0]=").append(_region.getDuoAreaCode());
-        urlBuilder.append("&start=").append(startDate.format(formatter));
-        urlBuilder.append("&end=").append(endDate.format(formatter));
         urlBuilder.append("&sort[0][column]=period");
         urlBuilder.append("&sort[0][direction]=desc");
         urlBuilder.append("&length=100");

@@ -19,7 +19,7 @@ public class Main {
         System.out.println("Vehicle city MPG: " + mpg);
 
         // Fetch regional gas price (hardcoded region, default to Regular gasoline)
-        GetAverageGasPrice gasPriceService = new GetAverageGasPrice(Region.US_NATIONAL);
+        GetAverageGasPrice gasPriceService = new GetAverageGasPrice(Region.NEW_YORK);
         double gasPrice = gasPriceService.getPrice();
         System.out.println("Current gas price: $" + String.format("%.2f", gasPrice) + "/gal\n");
 
