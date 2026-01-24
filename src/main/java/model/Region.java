@@ -17,19 +17,25 @@ public enum Region
     PADD_4("R40", "PADD 4 (Rocky Mountain)"),
     PADD_5("R50", "PADD 5 (West Coast)"),
 
-    // Selected States
+    // All States supported by EIA
     NEW_YORK("SNY", "New York"),
     TEXAS("STX", "Texas"),
     CALIFORNIA("SCA", "California"),
     FLORIDA("SFL", "Florida"),
     COLORADO("SCO", "Colorado"),
+    WASHINGTON("SWA", "Washington"),
+    OHIO("SOH", "Ohio"),
+    MINNESOTA("SMN", "Minnesota"),
 
-    // Selected Metro Areas
+    // All EIA Metro Areas
     HOUSTON("Y44HO", "Houston, TX"),
     LOS_ANGELES("Y40LA", "Los Angeles, CA"),
     NEW_YORK_METRO("Y44NY", "New York Metro"),
     CHICAGO("Y41IL", "Chicago, IL"),
-    ATLANTA("Y41GA", "Atlanta, GA");
+    ATLANTA("Y41GA", "Atlanta, GA"),
+    DENVER("YDEN", "Denver, CO"),
+    BOSTON("YBOS", "Boston, MA"),
+    CLEVELAND("YCLE", "Cleveland, OH");
 
     private final String duoAreaCode;
     private final String displayName;

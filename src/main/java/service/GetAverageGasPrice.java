@@ -60,6 +60,7 @@ public class GetAverageGasPrice
         urlBuilder.append("?frequency=weekly");
         urlBuilder.append("&data[0]=value");
         urlBuilder.append("&facets[duoarea][0]=").append(_region.getDuoAreaCode());
+        urlBuilder.append("&facets[product][0]=").append(URLEncoder.encode(_gasolineType, StandardCharsets.UTF_8));
         urlBuilder.append("&sort[0][column]=period");
         urlBuilder.append("&sort[0][direction]=desc");
         urlBuilder.append("&length=100");
