@@ -206,11 +206,15 @@ public class CLI
         {
             // Fetch city MPG
             service.GetCityMPG mpgService = new service.GetCityMPG();
-            double mpg = mpgService.getMpg(make, model, year);
+            double mpg = mpgService.getMpg(make, model, year, subModel);
 
             if (mpg == 0.0)
             {
                 System.out.println("ERROR: Could not find MPG data for " + year + " " + make + " " + model);
+                if (subModel != null && !subModel.isEmpty())
+                {
+                    System.out.println("        (Submodel: " + subModel + ")");
+                }
                 System.out.println("(Note: Data may only be available for 2015-2020 models)");
                 return;
             }
