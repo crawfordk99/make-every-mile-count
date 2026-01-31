@@ -1,22 +1,27 @@
-package service;
+package service.impl;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class GetCityMPG
+import service.api.CityMpgService;
+
+public class GetCityMPG implements CityMpgService
 {
     // Fetch city MPG; fallback to combined MPG if city not available
     // API: https://carapi.app/api/mileages/v2
     // allows for just three parameters: year, make, model
+    @Override
     public double getMpg(String make, String model, String year) throws Exception
     {
         return getMpg(make, model, year, null);
     }
 
+    @Override
     public double getMpg(String make, String model, String year, String submodel) throws Exception
     {
         String url = "https://carapi.app/api/mileages/v2?year=" + year +

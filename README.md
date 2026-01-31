@@ -10,7 +10,8 @@ they deliver. The decision to take certain delivery trips can be more complicate
 
 ## Tech Stack
 
-- Java
+- Java 21
+- Maven
 
 ## APIs/Dependencies
 - [CarAPI](https://carapi.app/api#/)
