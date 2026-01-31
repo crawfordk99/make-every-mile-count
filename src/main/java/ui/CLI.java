@@ -1,6 +1,7 @@
 package ui;
 
 import java.util.Scanner;
+
 import model.Region;
 
 /**
@@ -36,10 +37,17 @@ public class CLI
         // Get gasoline type
         String gasolineType = promptForGasolineType();
 
+        // Maintenance costs option
+        boolean includeMaintenance = promptForIncludeMaintenance();
+        model.MaintenanceCosts maintenance = null;
+        if (includeMaintenance) {
+            maintenance = promptForMaintenanceValues();
+        }
+
         System.out.println("\nFetching data...\n");
 
         // Calculate and display results
-        calculateAndDisplay(make, model, year, subModel, region, gasolineType);
+        calculateAndDisplay(make, model, year, subModel, region, gasolineType, maintenance);
 
         // Ask if user wants to try another calculation
         if (promptContinue())
@@ -200,12 +208,12 @@ public class CLI
     /**
      * Calculate and display results.
      */
-    private void calculateAndDisplay(String make, String model, String year, String subModel, Region region, String gasolineType) throws Exception
+    private void calculateAndDisplay(String make, String model, String year, String subModel, Region region, String gasolineType, model.MaintenanceCosts maintenance) throws Exception
     {
         try
         {
             // Fetch city MPG
-            service.GetCityMPG mpgService = new service.GetCityMPG();
+            service.api.CityMpgService mpgService = new service.impl.GetCityMPG();
             double mpg = mpgService.getMpg(make, model, year, subModel);
 
             if (mpg == 0.0)
@@ -222,7 +230,7 @@ public class CLI
             System.out.println("✓ Vehicle city MPG: " + mpg);
 
             // Fetch regional gas price
-            service.GetAverageGasPrice gasPriceService = new service.GetAverageGasPrice(region, gasolineType);
+            service.api.GasPriceService gasPriceService = new service.impl.GetAverageGasPrice(region, gasolineType);
             double gasPrice = gasPriceService.getPrice();
 
             if (gasPrice == 0.0)
@@ -233,19 +241,23 @@ public class CLI
 
             System.out.println("✓ Current gas price (" + getGasolineTypeName(gasolineType) + ") in " + region.getDisplayName() + ": $" + String.format("%.2f", gasPrice) + "/gal");
 
-            // Create vehicle and calculate cost per mile
-            model.Vehicle v = new model.Vehicle(make, model, year);
+            // Create vehicle and calculate gas cost per mile
+            model.Vehicle v = new model.Vehicle(make, model, year, subModel);
             v.setCityMpg(mpg);
             model.FuelCosts fc = new model.FuelCosts(gasPrice);
-            double costPerMile = fc.costPerMile(v);
+            double gasCostPerMile = fc.costPerMile(v);
+
+            double maintenancePerMile = (maintenance != null) ? maintenance.oilChangeCostPerMile() : 0.0;
+            double totalPerMile = gasCostPerMile + maintenancePerMile;
 
             System.out.println("\n=== RESULTS ===");
             System.out.println("Vehicle: " + year + " " + make + " " + model + " " + subModel);
             System.out.println("City MPG: " + mpg);
             System.out.println("Gas Price: $" + String.format("%.2f", gasPrice) + "/gal (" + getGasolineTypeName(gasolineType) + ")");
             System.out.println("Region: " + region.getDisplayName());
-            System.out.println("Cost per mile: $" + String.format("%.4f", costPerMile));
-            System.out.println("Cost per 100 miles: $" + String.format("%.2f", costPerMile * 100));
+    
+            System.out.println("Total cost per mile: $" + String.format("%.4f", totalPerMile));
+            System.out.println("Total cost per 100 miles: $" + String.format("%.2f", totalPerMile * 100));
             System.out.println();
         }
         catch (Exception e)
@@ -277,6 +289,51 @@ public class CLI
         System.out.print("Calculate another? (yes/no): ");
         String input = scanner.nextLine().trim().toLowerCase();
         return input.equals("yes") || input.equals("y");
+    }
+
+    private boolean promptForIncludeMaintenance()
+    {
+        System.out.print("Include maintenance costs (oil changes)? (y/N): ");
+        String input = scanner.nextLine().trim().toLowerCase();
+        return input.equals("y") || input.equals("yes");
+    }
+
+    private model.MaintenanceCosts promptForMaintenanceValues()
+    {
+        System.out.println("Default oil change: $" + model.MaintenanceCosts.DEFAULT_OIL_CHANGE_COST + " every " + model.MaintenanceCosts.DEFAULT_MILES_PER_OIL_CHANGE + " miles.");
+        System.out.print("Use defaults? (Enter to accept, N to customize): ");
+        String input = scanner.nextLine().trim().toLowerCase();
+        if (input.isEmpty() || input.equals("y") || input.equals("yes")) {
+            return new model.MaintenanceCosts();
+        }
+
+        double cost;
+        int miles;
+        while (true) {
+            try {
+                System.out.print("Enter oil change cost in dollars (e.g., 45.00): ");
+                String costStr = scanner.nextLine().trim();
+                cost = Double.parseDouble(costStr);
+                if (cost < 0) { System.out.println("Please enter a positive cost."); continue; }
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+            }
+        }
+
+        while (true) {
+            try {
+                System.out.print("Enter miles between oil changes (e.g., 5000): ");
+                String milesStr = scanner.nextLine().trim();
+                miles = Integer.parseInt(milesStr);
+                if (miles <= 0) { System.out.println("Please enter a positive integer."); continue; }
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter an integer.");
+            }
+        }
+
+        return new model.MaintenanceCosts(cost, miles);
     }
 
     public void close()

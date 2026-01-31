@@ -1,4 +1,4 @@
-package service;
+package service.impl;
 
 import java.io.FileInputStream;
 import java.net.URI;
@@ -7,15 +7,15 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-// import java.time.LocalDate;
-// import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import model.Region;
 
-public class GetAverageGasPrice
+import model.Region;
+import service.api.GasPriceService;
+
+public class GetAverageGasPrice implements GasPriceService
 {
     private Region _region;
     private String _gasolineType; // e.g., "EPMR" for Regular, "EPMPU" for Premium
@@ -41,6 +41,7 @@ public class GetAverageGasPrice
      * Fetch the latest gas price for the configured region and gasoline type.
      * @return price in $/gallon, or 0.0 if fetch fails
      */
+    @Override
     public double getPrice() throws Exception
     {
         String apiKey = loadApiKey();
