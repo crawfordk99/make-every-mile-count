@@ -12,12 +12,15 @@ they deliver. The decision to take certain delivery trips can be more complicate
 
 - Java 21
 - Maven
+- PostgreSQL
+- Flyway (for Database Migration scripts, basically database version control)
 
 ## APIs/Dependencies
 - [CarAPI](https://carapi.app/api#/)
 - [Jackson](https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind)
 - [Apache POI](https://poi.apache.org/)
 - [EIA API](https://www.eia.gov/opendata/)
+- [Flyway with Maven](https://documentation.red-gate.com/fd/quickstart-maven-184127578.html)
 
 ## Future work
 
