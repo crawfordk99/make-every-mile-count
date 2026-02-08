@@ -1,8 +1,14 @@
 package ui;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
 
 import model.Region;
+import repository.UserRepository;
+import repository.VehicleRepository;
 
 /**
  * Command-line interface for Make Every Mile Count.
@@ -11,10 +17,49 @@ import model.Region;
 public class CLI
 {
     private Scanner scanner;
+    private UserRepository userRepository;
+    private VehicleRepository vehicleRepository;
+    private String currentUserId = null;
 
     public CLI()
     {
         this.scanner = new Scanner(System.in);
+        
+        // Try to load DB credentials from config.properties first, then fall back to env vars
+        String dbUrl = null;
+        String dbUser = null;
+        String dbPassword = null;
+        
+        try {
+            Properties props = new Properties();
+            FileInputStream fis = new FileInputStream("config.properties");
+            props.load(fis);
+            fis.close();
+            
+            dbUrl = props.getProperty("DB_URL");
+            dbUser = props.getProperty("DB_USER");
+            dbPassword = props.getProperty("DB_PASSWORD");
+        } catch (IOException e) {
+            // config.properties not found, try environment variables
+        }
+        
+        // Fall back to environment variables if config.properties didn't provide values
+        if (dbUrl == null) {
+            dbUrl = System.getenv("DB_URL");
+        }
+        if (dbUser == null) {
+            dbUser = System.getenv("DB_USER");
+        }
+        if (dbPassword == null) {
+            dbPassword = System.getenv("DB_PASSWORD");
+        }
+        
+        if (dbUrl != null && dbUser != null && dbPassword != null) {
+            // Remove quotes if present (from properties file)
+            dbPassword = dbPassword.replaceAll("^'|'$", "");
+            this.userRepository = new UserRepository(dbUrl, dbUser, dbPassword);
+            this.vehicleRepository = new VehicleRepository(dbUrl, dbUser, dbPassword);
+        }
     }
 
     /**
@@ -25,11 +70,57 @@ public class CLI
         System.out.println("=== Make Every Mile Count ===");
         System.out.println("Calculate your cost per mile based on vehicle MPG and regional gas prices.\n");
 
-        // Get vehicle info
-        String make = promptForMake();
-        String model = promptForModel();
-        String year = promptForYear();
-        String subModel = promptForSubModel();
+        // Optional: ask if user wants to create account or login
+        if (userRepository != null && vehicleRepository != null) {
+            promptForAccount();
+        }
+
+        String make = "";
+        String model = "";
+        String year = "";
+        String subModel = "";
+
+        if (currentUserId != null) {
+            List<model.Vehicle> vehicles = vehicleRepository.getVehiclesByUserId(Integer.parseInt(currentUserId));
+            if (vehicles.isEmpty()) {
+                System.out.println("No saved vehicles found. Please enter vehicle information.\n");
+                make = promptForMake();
+                model = promptForModel();
+                year = promptForYear();
+                subModel = promptForSubModel();
+            } else  {
+                System.out.println("Saved vehicles:");
+                for (int i = 0; i < vehicles.size(); i++) {
+                    model.Vehicle v = vehicles.get(i);
+                    System.out.println((i + 1) + ". " + v.getYear() + " " + v.getMake() + " " + v.getModel() + " " + v.getSubModel());
+                }
+                System.out.print("Select a vehicle by number, or press Enter to input a new one: ");
+                String input = scanner.nextLine().trim();
+                if (!input.isEmpty()) {
+                    try {
+                        int choice = Integer.parseInt(input);
+                        if (choice >= 1 && choice <= vehicles.size()) {
+                            model.Vehicle selected = vehicles.get(choice - 1);
+                            make = selected.getMake();
+                            model = selected.getModel();
+                            year = selected.getYear();
+                            subModel = selected.getSubModel();
+                            System.out.println("Selected vehicle: " + year + " " + make + " " + model + " " + subModel);
+                        } else {
+                            System.out.println("Invalid choice. Proceeding to manual input.\n");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid input. Proceeding to manual input.\n");
+                    }
+                }
+            }
+        }else {
+            // Get vehicle info from user input
+            make = promptForMake();
+            model = promptForModel();
+            year = promptForYear();
+            subModel = promptForSubModel();
+        }
 
         // Get region
         Region region = promptForRegion();
@@ -44,10 +135,16 @@ public class CLI
             maintenance = promptForMaintenanceValues();
         }
 
+        // Retrieve saved vehicles for duplicate check and MPG lookup
+        List<model.Vehicle> savedVehicles = new java.util.ArrayList<>();
+        if (currentUserId != null) {
+            savedVehicles = vehicleRepository.getVehiclesByUserId(Integer.parseInt(currentUserId));
+        }
+
         System.out.println("\nFetching data...\n");
 
         // Calculate and display results
-        calculateAndDisplay(make, model, year, subModel, region, gasolineType, maintenance);
+        calculateAndDisplay(make, model, year, subModel, region, gasolineType, maintenance, savedVehicles);
 
         // Ask if user wants to try another calculation
         if (promptContinue())
@@ -208,23 +305,41 @@ public class CLI
     /**
      * Calculate and display results.
      */
-    private void calculateAndDisplay(String make, String model, String year, String subModel, Region region, String gasolineType, model.MaintenanceCosts maintenance) throws Exception
+    private void calculateAndDisplay(String make, String model, String year, String subModel, Region region, String gasolineType, model.MaintenanceCosts maintenance, List<model.Vehicle> savedVehicles) throws Exception
     {
         try
         {
-            // Fetch city MPG
-            service.api.CityMpgService mpgService = new service.impl.GetCityMPG();
-            double mpg = mpgService.getMpg(make, model, year, subModel);
-
-            if (mpg == 0.0)
-            {
-                System.out.println("ERROR: Could not find MPG data for " + year + " " + make + " " + model);
-                if (subModel != null && !subModel.isEmpty())
-                {
-                    System.out.println("        (Submodel: " + subModel + ")");
+            // Check if this vehicle is already saved and has an MPG value
+            double mpg = 0.0;
+            boolean isAlreadySaved = false;
+            
+            for (model.Vehicle saved : savedVehicles) {
+                if (saved.getMake().equalsIgnoreCase(make) && 
+                    saved.getModel().equalsIgnoreCase(model) && 
+                    saved.getYear().equals(year) && 
+                    saved.getSubModel().equalsIgnoreCase(subModel)) {
+                    mpg = saved.getCityMpg();
+                    isAlreadySaved = true;
+                    System.out.println("✓ Found saved vehicle with MPG: " + mpg);
+                    break;
                 }
-                System.out.println("(Note: Data may only be available for 2015-2020 models)");
-                return;
+            }
+            
+            // If not saved or no MPG data, fetch from API
+            if (mpg == 0.0) {
+                service.api.CityMpgService mpgService = new service.impl.GetCityMPG();
+                mpg = mpgService.getMpg(make, model, year, subModel);
+
+                if (mpg == 0.0)
+                {
+                    System.out.println("ERROR: Could not find MPG data for " + year + " " + make + " " + model);
+                    if (subModel != null && !subModel.isEmpty())
+                    {
+                        System.out.println("        (Submodel: " + subModel + ")");
+                    }
+                    System.out.println("(Note: Data may only be available for 2015-2020 models)");
+                    return;
+                }
             }
 
             System.out.println("✓ Vehicle city MPG: " + mpg);
@@ -259,6 +374,11 @@ public class CLI
             System.out.println("Total cost per mile: $" + String.format("%.4f", totalPerMile));
             System.out.println("Total cost per 100 miles: $" + String.format("%.2f", totalPerMile * 100));
             System.out.println();
+
+            // If user is logged in and vehicle is not already saved, offer to save it
+            if (currentUserId != null && savedVehicles != null) {
+                saveVehicleIfDesired(v, savedVehicles);
+            }
         }
         catch (Exception e)
         {
@@ -339,5 +459,123 @@ public class CLI
     public void close()
     {
         scanner.close();
+    }
+
+    /**
+     * Prompt user for account setup: login, create account, or skip.
+     */
+    private void promptForAccount() {
+        System.out.println("Save your vehicles for future reference? (optional)");
+        System.out.print("1. Create account\n2. Login\n 3. Skip (Press Enter)\nEnter choice (1-2, default=2): ");
+        String input = scanner.nextLine().trim();
+
+        if (input.isEmpty() || input.equals("3")) {
+            System.out.println("Proceeding without account.\n");
+            return;
+        }
+        
+        if (input.equals("2")) {
+            signIn();
+        } 
+
+        if (input.equals("1")) {
+            createAccount();
+        } else {
+            System.out.println("Invalid choice.\n");
+        }
+    }
+
+    /**
+     * Prompt user to create a new account.
+     */
+    private void createAccount() {
+        System.out.print("Enter email: ");
+        String email = scanner.nextLine().trim();
+
+        // Check if email already exists
+        model.User existingUser = userRepository.getUserByEmail(email);
+        if (existingUser != null) {
+            System.out.println("Account already exists for this email. Proceeding without saving.\n");
+            return;
+        }
+
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine().trim();
+
+        // Hash password (simple example - in production, use proper hashing)
+        String passwordHash = hashPassword(password);
+
+        int userId = userRepository.createUser(email, passwordHash);
+        if (userId > 0) {
+            currentUserId = String.valueOf(userId);
+            System.out.println("Account created successfully!\n");
+        } else {
+            System.out.println("Failed to create account. Proceeding without saving.\n");
+        }
+    }
+
+    private void signIn() {
+        System.out.print("Enter email: ");
+        String inputEmail = scanner.nextLine().trim();
+
+        // Check if email already exists
+        model.User existingUser = userRepository.getUserByEmail(inputEmail);
+        if (existingUser != null) {
+            while (true) {
+                System.out.print("Enter password: ");
+                String inputPassword = scanner.nextLine().trim();
+                String inputHash = hashPassword(inputPassword);
+                if (inputHash.equals(existingUser.getPasswordHash())) {
+                    currentUserId = existingUser.getUserId();
+                    System.out.println("Signed in successfully!\n");
+                    
+                    return;
+                } else {
+                    System.out.println("Incorrect password. Try again.");
+                }
+            }
+        } else {
+            System.out.println("No account found for this email. Please create an account first.\n");
+        }
+
+    }
+
+    /**
+     * Simple password hashing (in production, use bcrypt or similar).
+     */
+    private String hashPassword(String password) {
+        return Integer.toHexString(password.hashCode());
+    }
+
+    /**
+     * Offer to save the current vehicle to the database.
+     */
+    private void saveVehicleIfDesired(model.Vehicle vehicle, List<model.Vehicle> savedVehicles) {
+        // Check if vehicle already exists
+        for (model.Vehicle saved : savedVehicles) {
+            if (saved.getMake().equalsIgnoreCase(vehicle.getMake()) && 
+                saved.getModel().equalsIgnoreCase(vehicle.getModel()) && 
+                saved.getYear().equals(vehicle.getYear()) && 
+                saved.getSubModel().equalsIgnoreCase(vehicle.getSubModel())) {
+                System.out.println("This vehicle is already saved in your account.\n");
+                return;
+            }
+        }
+        
+        System.out.print("Save this vehicle to your account? (y/N): ");
+        String input = scanner.nextLine().trim().toLowerCase();
+        
+        if (input.equals("y") || input.equals("yes")) {
+            try {
+                int vehicleId = vehicleRepository.saveVehicle(Integer.parseInt(currentUserId), vehicle);
+                if (vehicleId > 0) {
+                    System.out.println("✓ Vehicle saved successfully!\n");
+                } else {
+                    System.out.println("Failed to save vehicle.\n");
+                }
+            } catch (Exception e) {
+                System.err.println("Error saving vehicle: " + e.getMessage());
+            }
+        }
     }
 }
