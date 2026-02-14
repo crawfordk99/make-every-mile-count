@@ -5,16 +5,27 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import service.api.CityMpgService;
 
+@Service
 public class GetCityMPG implements CityMpgService
 {
+    private final HttpClient _httpClient;
     // Fetch city MPG; fallback to combined MPG if city not available
     // API: https://carapi.app/api/mileages/v2
     // allows for just three parameters: year, make, model
+
+
+    public GetCityMPG(HttpClient httpClient) 
+    {
+        this._httpClient = httpClient;
+    }
+
     @Override
     public double getMpg(String make, String model, String year) throws Exception
     {
@@ -28,7 +39,7 @@ public class GetCityMPG implements CityMpgService
                 "&make=" + make +
                 "&model=" + model;
 
-        HttpClient client = HttpClient.newHttpClient();
+        // HttpClient client = HttpClient.newHttpClient();
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -36,7 +47,7 @@ public class GetCityMPG implements CityMpgService
                 .GET()
                 .build();
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = _httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(response.body());

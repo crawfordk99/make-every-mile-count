@@ -1,5 +1,5 @@
 package service.api;
 
 public interface GasPriceService {
-    double getPrice() throws Exception;
+    double getPrice(String region, String fuelType) throws Exception;
 }
