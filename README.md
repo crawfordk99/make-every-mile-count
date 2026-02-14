@@ -14,6 +14,7 @@ they deliver. The decision to take certain delivery trips can be more complicate
 - Maven
 - PostgreSQL
 - Flyway (for Database Migration scripts, basically database version control)
+- Spring Boot (For web application)
 
 ## APIs/Dependencies
 - [CarAPI](https://carapi.app/api#/)

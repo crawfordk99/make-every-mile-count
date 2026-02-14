@@ -1,7 +1,6 @@
 package repository;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,14 +14,10 @@ import model.Vehicle;
  * Handles creation and retrieval of vehicles.
  */
 public class VehicleRepository {
-    private String _dbUrl;
-    private String _dbUser;
-    private String _dbPassword;
+    private final Connection _connection;
 
-    public VehicleRepository(String dbUrl, String dbUser, String dbPassword) {
-        this._dbUrl = dbUrl;
-        this._dbUser = dbUser;
-        this._dbPassword = dbPassword;
+    public VehicleRepository(Connection connection) {
+        this._connection = connection;
     }
 
     /**
@@ -34,8 +29,7 @@ public class VehicleRepository {
     public int saveVehicle(int userId, Vehicle vehicle) {
         String sql = "INSERT INTO vehicles (owner_id, make, model, year, submodel, city_mpg) VALUES (?, ?, ?, ?, ?, ?) RETURNING id";
 
-        try (Connection conn = DriverManager.getConnection(_dbUrl, _dbUser, _dbPassword);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement stmt = _connection.prepareStatement(sql)) {
 
             stmt.setInt(1, userId);
             stmt.setString(2, vehicle.getMake());
@@ -63,8 +57,7 @@ public class VehicleRepository {
         List<Vehicle> vehicles = new ArrayList<>();
         String sql = "SELECT make, model, year, submodel, city_mpg FROM vehicles WHERE owner_id = ?";
 
-        try (Connection conn = DriverManager.getConnection(_dbUrl, _dbUser, _dbPassword);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement stmt = _connection.prepareStatement(sql)) {
 
             stmt.setInt(1, ownerId);
             ResultSet rs = stmt.executeQuery();

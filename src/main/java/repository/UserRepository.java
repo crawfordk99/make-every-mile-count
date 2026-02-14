@@ -1,7 +1,6 @@
 package repository;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,14 +12,14 @@ import model.User;
  * Handles creation and retrieval of user accounts.
  */
 public class UserRepository {
-    private String _dbUrl;
-    private String _dbUser;
-    private String _dbPassword;
+    // private String _dbUrl;
+    // private String _dbUser;
+    // private String _dbPassword;
 
-    public UserRepository(String dbUrl, String dbUser, String dbPassword) {
-        this._dbUrl = dbUrl;
-        this._dbUser = dbUser;
-        this._dbPassword = dbPassword;
+    private final Connection _connection;
+
+    public UserRepository(Connection connection) {
+        this._connection = connection;
     }
 
     /**
@@ -30,8 +29,7 @@ public class UserRepository {
     public int createUser(String email, String passwordHash) {
         String sql = "INSERT INTO users (email, password_hash) VALUES (?, ?) RETURNING id";
 
-        try (Connection conn = DriverManager.getConnection(_dbUrl, _dbUser, _dbPassword);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement stmt = _connection.prepareStatement(sql)) {
 
             stmt.setString(1, email);
             stmt.setString(2, passwordHash);
@@ -53,8 +51,7 @@ public class UserRepository {
     public User getUserByEmail(String email) {
         String sql = "SELECT id, email, password_hash FROM users WHERE email = ?";
 
-        try (Connection conn = DriverManager.getConnection(_dbUrl, _dbUser, _dbPassword);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement stmt = _connection.prepareStatement(sql)) {
 
             stmt.setString(1, email);
             ResultSet rs = stmt.executeQuery();

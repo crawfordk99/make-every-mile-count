@@ -19,13 +19,51 @@
     </properties>
 
     <dependencies>
+        <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot</artifactId>
+            <version>4.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-maven-plugin -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <version>4.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>4.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>4.0.2</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Jackson for JSON parsing -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.16.1</version>
         </dependency>
-        <!-- Apache for loading excel data -->
+        <!-- Ensure SLF4J API matches Logback / Spring Boot expectations -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.7</version>
+        </dependency>
+        <!-- Apache for loading excel data
         <dependency>
         <groupId>org.apache.poi</groupId>
         <artifactId>poi</artifactId>
@@ -35,7 +73,7 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>5.2.5</version>
-        </dependency>
+        </dependency> -->
 
         <!-- Test dependencies -->
         <dependency>
@@ -85,7 +123,7 @@
                     <url>${env.DB_URL}</url>
                     <user>${env.DB_USER}</user>
                     <password>${env.DB_PASSWORD}</password>
-                    <locations>filesystem:src/main/db/migration</locations>
+                    <locations>filesystem:src/main/resources/db/migration</locations>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -94,6 +132,18 @@
                         <version>12.0.0</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>4.0.2</version> <!-- Use the appropriate version -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

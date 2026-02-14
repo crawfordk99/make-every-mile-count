@@ -1,40 +1,32 @@
 package service.impl;
 
-import java.io.FileInputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.Properties;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import model.Region;
 import service.api.GasPriceService;
 
+@Service
 public class GetAverageGasPrice implements GasPriceService
 {
-    private Region _region;
-    private String _gasolineType; // e.g., "EPMR" for Regular, "EPMPU" for Premium
+    private final HttpClient _httpClient;
+    private final String eiaApiKey;
+
     private static final String EIA_BASE_URL = "https://api.eia.gov/v2/petroleum/pri/gnd/data/";
 
-    public GetAverageGasPrice()
+    public GetAverageGasPrice(HttpClient httpClient, @Value("${eia.api.key}") String apiKey) 
     {
-        this(Region.US_NATIONAL, "EPMR"); // Default: US National, Regular Gasoline
-    }
-
-    public GetAverageGasPrice(Region region)
-    {
-        this(region, "EPMR"); // Default to Regular Gasoline
-    }
-
-    public GetAverageGasPrice(Region region, String gasolineType)
-    {
-        this._region = region;
-        this._gasolineType = gasolineType;
+        this._httpClient = httpClient;
+        this.eiaApiKey = apiKey;
     }
 
     /**
@@ -42,10 +34,10 @@ public class GetAverageGasPrice implements GasPriceService
      * @return price in $/gallon, or 0.0 if fetch fails
      */
     @Override
-    public double getPrice() throws Exception
+    public double getPrice(String region, String fuelType) throws Exception
     {
-        String apiKey = loadApiKey();
-        if (apiKey == null || apiKey.isEmpty())
+        
+        if (eiaApiKey == null || eiaApiKey.isEmpty())
         {
             System.err.println("ERROR: EIA_API_KEY not found in config.properties or environment");
             return 0.0;
@@ -60,24 +52,24 @@ public class GetAverageGasPrice implements GasPriceService
         StringBuilder urlBuilder = new StringBuilder(EIA_BASE_URL);
         urlBuilder.append("?frequency=weekly");
         urlBuilder.append("&data[0]=value");
-        urlBuilder.append("&facets[duoarea][0]=").append(_region.getDuoAreaCode());
-        urlBuilder.append("&facets[product][0]=").append(URLEncoder.encode(_gasolineType, StandardCharsets.UTF_8));
+        urlBuilder.append("&facets[duoarea][0]=").append(region);
+        urlBuilder.append("&facets[product][0]=").append(URLEncoder.encode(fuelType, StandardCharsets.UTF_8));
         urlBuilder.append("&sort[0][column]=period");
         urlBuilder.append("&sort[0][direction]=desc");
         urlBuilder.append("&length=100");
-        urlBuilder.append("&api_key=").append(URLEncoder.encode(apiKey, StandardCharsets.UTF_8));
+        urlBuilder.append("&api_key=").append(URLEncoder.encode(eiaApiKey, StandardCharsets.UTF_8));
 
         String url = urlBuilder.toString();
         System.out.println("Calling EIA API...");
 
-        HttpClient client = HttpClient.newHttpClient();
+        // HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header("Accept", "application/json")
                 .GET()
                 .build();
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = _httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200)
         {
@@ -116,9 +108,9 @@ public class GetAverageGasPrice implements GasPriceService
         }
 
         double price = valueNode.asDouble();
-        String period = latestEntry.path("period").asText();
-        System.out.println("Fetched gas price for " + _region.getDisplayName() + 
-                           " (" + _gasolineType + ") on " + period + ": $" + price);
+        // String period = latestEntry.path("period").asText();
+        // System.out.println("Fetched gas price for " + _region.getDisplayName() + 
+        //                    " (" + _gasolineType + ") on " + period + ": $" + price);
 
         return price;
     }
@@ -126,30 +118,34 @@ public class GetAverageGasPrice implements GasPriceService
     /**
      * Load API key from config.properties or environment variable.
      */
-    private String loadApiKey()
-    {
-        // Try environment variable first
-        String envKey = System.getenv("EIA_API_KEY");
-        if (envKey != null && !envKey.isEmpty())
-        {
-            return envKey.replaceAll("\"", "").trim();
-        }
+    // private String loadApiKey()
+    // {
+    //     // Try environment variable first
+    //     String envKey = System.getenv("EIA_API_KEY");
+    //     if (envKey != null && !envKey.isEmpty())
+    //     {
+    //         return envKey.replaceAll("\"", "").trim();
+    //     }
 
-        // Fall back to config.properties
-        try
-        {
-            Properties prop = new Properties();
-            prop.load(new FileInputStream("config.properties"));
-            String key = prop.getProperty("EIA_API_KEY");
-            if (key != null)
-            {
-                return key.replaceAll("\"", "").trim();
-            }
-        }
-        catch (Exception e)
-        {
-            System.err.println("WARNING: Could not load config.properties: " + e.getMessage());
-        }
-        return null;
-    }
+    //     // Fall back to config.properties
+    //     try
+    //     {
+    //         Properties prop = new Properties();
+    //         prop.load(new FileInputStream("config.properties"));
+    //         String key = prop.getProperty("EIA_API_KEY");
+    //         if (key != null)
+    //         {
+    //             return key.replaceAll("\"", "").trim();
+    //         }
+    //     }
+    //     catch (FileNotFoundException e)
+    //     {
+    //         System.err.println("WARNING: Could not find config.properties: " + e.getMessage());
+    //     }
+    //     catch (IOException e)
+    //     {
+    //         System.err.println("WARNING: Could not load config.properties: " + e.getMessage());
+    //     }
+    //     return null;
+    // }
 }
