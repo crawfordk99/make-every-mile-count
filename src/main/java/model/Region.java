@@ -29,10 +29,9 @@ public enum Region
 
     // All EIA Metro Areas
     HOUSTON("Y44HO", "Houston, TX"),
-    LOS_ANGELES("Y40LA", "Los Angeles, CA"),
-    NEW_YORK_METRO("Y44NY", "New York Metro"),
-    CHICAGO("Y41IL", "Chicago, IL"),
-    ATLANTA("Y41GA", "Atlanta, GA"),
+    LOS_ANGELES("Y05LA", "Los Angeles, CA"),
+    NEW_YORK_METRO("Y35NY", "New York Metro"),
+    CHICAGO("YORD", "Chicago, IL"),
     DENVER("YDEN", "Denver, CO"),
     BOSTON("YBOS", "Boston, MA"),
     CLEVELAND("YCLE", "Cleveland, OH");

@@ -61,6 +61,7 @@ public class GetAverageGasPrice implements GasPriceService
 
         String url = urlBuilder.toString();
         System.out.println("Calling EIA API...");
+        System.out.println("URL: " + url);
 
         // HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
