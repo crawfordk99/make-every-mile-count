@@ -16,6 +16,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-boot.version>3.3.0</spring-boot.version>
     </properties>
 
     <dependencies>
@@ -23,7 +24,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot</artifactId>
-            <version>4.0.2</version>
+            <version>${spring-boot.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -31,7 +32,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>4.0.2</version>
+            <version>${spring-boot.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -39,7 +40,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>4.0.2</version>
+            <version>${spring-boot.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -47,16 +48,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <version>4.0.2</version>
+            <version>${spring-boot.version}</version>
             <scope>test</scope>
         </dependency>
 
-        <!-- Jackson for JSON parsing -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.16.1</version>
-        </dependency>
+        <!-- Jackson is managed by Spring Boot starter-web -->
         <!-- Ensure SLF4J API matches Logback / Spring Boot expectations -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -101,8 +97,22 @@
                 <version>12.0.0</version>
                 <scope>compile</scope>
             </dependency>   
-        
 
+            <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-actuator -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-actuator</artifactId>
+                <version>${spring-boot.version}</version>
+                <scope>compile</scope>
+            </dependency>
+        
+        <!-- Thymeleaf for server-rendered templates -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+        
     </dependencies>
 
     <build>
@@ -136,7 +146,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>4.0.2</version> <!-- Use the appropriate version -->
+                <version>${spring-boot.version}</version> <!-- Use the appropriate version -->
                 <executions>
                     <execution>
                         <goals>
