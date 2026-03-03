@@ -7,12 +7,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Repository;
+
 import model.Vehicle;
 
 /**
  * Data access object for Vehicle operations.
  * Handles creation and retrieval of vehicles.
  */
+
+@Repository
 public class VehicleRepository {
     private final Connection _connection;
 
