@@ -14,6 +14,6 @@ public class FuelCosts
         // Guard against division by zero; caller should validate city MPG
         double cityMpg = vehicle.getCityMpg();
         if (cityMpg == 0.0) return 0.0;
-        return this._averageGasPrice / cityMpg;
+        return _averageGasPrice / cityMpg;
     }
 }

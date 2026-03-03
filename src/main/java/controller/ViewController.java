@@ -30,7 +30,7 @@ public class ViewController {
 
     @GetMapping("/saved")
     public String saved(Model model) {
-        model.addAttribute("title", "Saved Calculations");
+        model.addAttribute("title", "Saved Vehicle Information");
         return "saved";
     }
 }

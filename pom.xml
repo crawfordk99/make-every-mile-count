@@ -5,6 +5,13 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.4</version>
+        <relativePath/> 
+    </parent>
+
     <groupId>com.memc</groupId>
     <artifactId>make-every-mile-count</artifactId>
     <version>1.0.0</version>
@@ -16,7 +23,6 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>3.3.0</spring-boot.version>
     </properties>
 
     <dependencies>
@@ -24,15 +30,21 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot</artifactId>
-            <version>${spring-boot.version}</version>
+            
             <scope>compile</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+            
         </dependency>
 
         <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-maven-plugin -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>${spring-boot.version}</version>
+            <version>3.5.10</version>
             <scope>compile</scope>
         </dependency>
 
@@ -40,7 +52,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring-boot.version}</version>
+            
             <scope>compile</scope>
         </dependency>
 
@@ -48,8 +60,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <version>${spring-boot.version}</version>
+            
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
         <!-- Jackson is managed by Spring Boot starter-web -->
@@ -88,21 +105,24 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.9</version>
         </dependency>
         <!-- Source: https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
             <dependency>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-core</artifactId>
-                <version>12.0.0</version>
+                <version>11.7.2</version>
                 <scope>compile</scope>
             </dependency>   
-
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-database-postgresql</artifactId>
+                <version>11.7.2</version>
+                <scope>compile</scope>
+            </dependency>   
             <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-actuator -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-actuator</artifactId>
-                <version>${spring-boot.version}</version>
                 <scope>compile</scope>
             </dependency>
         
@@ -110,7 +130,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
-            <version>${spring-boot.version}</version>
         </dependency>
         
     </dependencies>
@@ -128,7 +147,7 @@
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
-                <version>12.0.0</version>
+                <version>11.7.2</version>
                 <configuration>
                     <url>${env.DB_URL}</url>
                     <user>${env.DB_USER}</user>
@@ -139,14 +158,14 @@
                     <dependency>
                         <groupId>org.flywaydb</groupId>
                         <artifactId>flyway-database-postgresql</artifactId>
-                        <version>12.0.0</version>
+                        <version>11.7.2</version>
                     </dependency>
                 </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot.version}</version> <!-- Use the appropriate version -->
+                 <!-- Use the appropriate version -->
                 <executions>
                     <execution>
                         <goals>

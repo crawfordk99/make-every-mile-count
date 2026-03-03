@@ -3,3 +3,8 @@ eia.api.key = ${EIA_API_KEY:}
 db.url = ${DB_URL:}
 db.user = ${DB_USER:}
 db.password = ${DB_PASSWORD:}
+
+Allows spring JPA to handle all database updates for now
+spring.jpa.hibernate.ddl-auto = update
+spring.jpa.show-sql = true
+spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.PostgreSQLDialect
