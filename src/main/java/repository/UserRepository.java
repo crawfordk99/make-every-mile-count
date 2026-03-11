@@ -1,8 +1,9 @@
 package repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.Optional;
 
 import entity.UserEntity;
 
@@ -17,7 +18,5 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     Optional<UserEntity> findByEmail(String email);
 
     boolean existsByEmail(String email);
-    
-    UserEntity save(UserEntity userEntity);
     
 }

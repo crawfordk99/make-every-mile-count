@@ -2,9 +2,9 @@ package service.impl;
 
 import org.springframework.stereotype.Service;
 
+import entity.VehicleEntity;
 import model.FuelCosts;
 import model.MaintenanceCosts;
-import model.Vehicle;
 import service.api.CityMpgService;
 import service.api.GasPriceService;
 
@@ -36,8 +36,7 @@ public class MileageCalculator {
         double gasPrice = _gasService.getPrice(region, fuelType);
         if (gasPrice == 0.0) return 0.0;
 
-        Vehicle v = new Vehicle(make, model, year, submodel);
-        v.setCityMpg(mpg);
+        VehicleEntity v = new VehicleEntity(make, model, year, submodel, mpg, null);
         FuelCosts fc = new FuelCosts(gasPrice);
         return fc.costPerMile(v);
     }

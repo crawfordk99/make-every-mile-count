@@ -29,8 +29,8 @@
                 </div>
                 <button type="submit">Login</button>
             </form>
-            <input type="hidden" id="csrfToken" th:value="${_csrf.token}" />
-            <input type="hidden" id="csrfHeader" th:value="${_csrf.headerName}" />
+            <!-- <input type="hidden" id="csrfToken" th:value="${_csrf.token}" />
+            <input type="hidden" id="csrfHeader" th:value="${_csrf.headerName}" /> -->
             <div th:if="${param.error}">
                 <p style="color: red;">Invalid email or password. Please try again.</p>
             </div>
@@ -42,7 +42,7 @@
 
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            
+            e.preventDefault(); // Prevent the default form submission
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
@@ -59,9 +59,9 @@
                 const response = await fetch('/login', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'application/x-www-form-urlencoded'
                         // Spring Security requires a CSRF token for POST requests
-                        [header]: token 
+                        // [header]: token
                     },
                     body: formData
                 });

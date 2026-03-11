@@ -1,15 +1,12 @@
 package repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import model.Vehicle;
+import entity.UserEntity;
+import entity.VehicleEntity;
 
 /**
  * Data access object for Vehicle operations.
@@ -17,68 +14,6 @@ import model.Vehicle;
  */
 
 @Repository
-public class VehicleRepository {
-    private final Connection _connection;
-
-    public VehicleRepository(Connection connection) {
-        this._connection = connection;
-    }
-
-    /**
-     * Save a vehicle to the database.
-     * @param userId the owner's user ID
-     * @param vehicle the Vehicle object to save
-     * @return the vehicle's ID, or -1 if save failed
-     */
-    public int saveVehicle(int userId, Vehicle vehicle) {
-        String sql = "INSERT INTO vehicles (owner_id, make, model, year, submodel, city_mpg) VALUES (?, ?, ?, ?, ?, ?) RETURNING id";
-
-        try (PreparedStatement stmt = _connection.prepareStatement(sql)) {
-
-            stmt.setInt(1, userId);
-            stmt.setString(2, vehicle.getMake());
-            stmt.setString(3, vehicle.getModel());
-            stmt.setString(4, vehicle.getYear());
-            stmt.setString(5, vehicle.getSubModel());
-            stmt.setDouble(6, vehicle.getCityMpg());
-
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("id");
-            }
-        } catch (SQLException e) {
-            System.err.println("Error saving vehicle: " + e.getMessage());
-        }
-        return -1;
-    }
-
-    /**
-     * Retrieve all vehicles for a user.
-     * @param ownerId the owner's user ID
-     * @return a list of Vehicle objects
-     */
-    public List<Vehicle> getVehiclesByUserId(int ownerId) {
-        List<Vehicle> vehicles = new ArrayList<>();
-        String sql = "SELECT make, model, year, submodel, city_mpg FROM vehicles WHERE owner_id = ?";
-
-        try (PreparedStatement stmt = _connection.prepareStatement(sql)) {
-
-            stmt.setInt(1, ownerId);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                Vehicle vehicle = new Vehicle(
-                    rs.getString("make"),
-                    rs.getString("model"),
-                    rs.getString("year"),
-                    rs.getString("submodel")
-                );
-                vehicle.setCityMpg(rs.getDouble("city_mpg"));
-                vehicles.add(vehicle);
-            }
-        } catch (SQLException e) {
-            System.err.println("Error retrieving vehicles: " + e.getMessage());
-        }
-        return vehicles;
-    }
+public interface VehicleRepository extends JpaRepository<VehicleEntity, String>{
+    List<VehicleEntity> findByOwnerId(UserEntity ownerId);
 }

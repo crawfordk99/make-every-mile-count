@@ -15,14 +15,15 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for simplicity; consider enabling in production
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/login", "/", "/signup", "/calculate", "/styles/**", "/css/**", "/js/**").permitAll() // Allow login and registration without authentication
+                .anyRequest().authenticated() // Require authentication for all other requests
+            )
             .formLogin(form -> form
                 .loginPage("/login")
                 .usernameParameter("email")
                 .defaultSuccessUrl("/saved", true)
-                .permitAll()) // Configure form login
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/register", "/calculate", "/css/**", "/js/**").permitAll() // Allow login and registration without authentication
-                .anyRequest().authenticated() // Require authentication for all other requests
+                .permitAll() // Configure form login
             );
         return http.build();
     }
