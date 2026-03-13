@@ -235,7 +235,7 @@ table tr:hover {
     background-color: #2980b9;
 }
 
-/* signup link specific */
+/* signup link specific
 .signup-link {
     text-align: center;
     margin-top: 1rem;
@@ -248,4 +248,4 @@ table tr:hover {
 
 .signup-link a:hover {
     text-decoration: underline;
-}
+} */

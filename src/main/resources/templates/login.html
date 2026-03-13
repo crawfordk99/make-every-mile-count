@@ -17,43 +17,63 @@
     </nav>
     <div class="container">
         <div class="card">
-            <h1>Login</h1>
-            <form id="loginForm">
-                <div>
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            <div class = "login-block">
+                <h1>Login</h1>
+                <form id="loginForm" autocomplete="off">
+                    <div>
+                        <label for="email">Email</label>
+                        <input type="email" id="loginEmail" name="email" placeholder="Enter your email" required>
+                    </div>
+                    <div>
+                        <label for="password">Password</label>
+                        <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+                <div class="toggle-link">
+                    Don't have an account? <a href="javascript:void(0)" onclick="toggleAuth()">Sign up here</a>
                 </div>
-                <div>
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <div class="signup-block" style="display: none;">
+                <h2>New here?</h2>
+                <p>Sign up to save your calculations and access them anytime!</p>
+                <form id="signupForm" autocomplete = "off">
+                    <div>
+                        <label for="email">Email</label>
+                        <input type="email" id="signupEmail" name="email" placeholder="Enter your email" required>
+                    </div>
+                    <div>
+                        <label for="password">Password</label>
+                        <input type="password" id="signupPassword" name="password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit">Sign Up</button>
+                </form>
+                <div class="toggle-link">
+                    Already have an account? <a href="javascript:void(0)" onclick="toggleAuth()">Login here</a>
                 </div>
-                <button type="submit">Login</button>
-            </form>
+            </div>
             <!-- <input type="hidden" id="csrfToken" th:value="${_csrf.token}" />
             <input type="hidden" id="csrfHeader" th:value="${_csrf.headerName}" /> -->
-            <div th:if="${param.error}">
-                <p style="color: red;">Invalid email or password. Please try again.</p>
-            </div>
-            <div class="signup-link">
-                Don't have an account? <a href="/signup">Sign up here</a>
-            </div>
+            <div class ="auth-error" style="color: red; display: none; margin-top: 10px;"> </div>
         </div>
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault(); // Prevent the default form submission
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        async function handleLogin(event) {
+            event.preventDefault(); // Prevent the default form submission
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
 
             // Security tokens
-            const token = document.getElementById('csrfToken').value;
-            const header = document.getElementById('csrfHeader').value;
+            // const token = document.getElementById('csrfToken').value;
+            // const header = document.getElementById('csrfHeader').value;
 
             // Construct the body in the format Spring Security expects
             const formData = new URLSearchParams();
             formData.append('email', email); // Matches .usernameParameter("email") in Config
             formData.append('password', password);
+
+            console.log(formData.toString());
 
             try {
                 const response = await fetch('/login', {
@@ -66,6 +86,8 @@
                     body: formData
                 });
 
+                console.log(response.status + " " + response.statusText);
+
                 if (response.redirected) {
                     // Success! Spring redirected us to /saved
                     window.location.href = "/saved";
@@ -75,7 +97,49 @@
             } catch (error) {
                 console.error("Login failed", error);
             }
-        });
+        }
+
+        
+
+        function toggleAuth() {
+            const loginBlock = document.querySelector('.login-block');
+            const signupBlock = document.querySelector('.signup-block');
+            const authError = document.querySelector('.auth-error');
+
+            authError.style.display= 'none';
+
+            loginBlock.style.display = loginBlock.style.display === 'none' ? 'block' : 'none';
+            signupBlock.style.display = signupBlock.style.display === 'none' ? 'block' : 'none';
+            
+
+        }
+
+        async function handleSignup(event) {
+            event.preventDefault();
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            const signupData = new URLSearchParams();
+            signupData.append('email', email);
+            signupData.append('password', password);
+
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: signupData
+            });
+
+            if (response.ok) {
+                alert("Account created! You can now log in.");
+                toggleAuth(); // Switch back to the login view
+            } else {
+                const errorText = await response.text();
+                document.getElementById('authError').innerText = errorText;
+                document.getElementById('authError').style.display = 'block';
+            }
+        }
+        document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        document.getElementById('signupForm').addEventListener('submit', handleSignup);
     </script>
 </body>
 </html>

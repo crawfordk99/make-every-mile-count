@@ -16,7 +16,7 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for simplicity; consider enabling in production
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/", "/signup", "/calculate", "/styles/**", "/css/**", "/js/**").permitAll() // Allow login and registration without authentication
+                .requestMatchers("/login", "/", "/register", "/calculate", "/styles/**", "/css/**", "/js/**").permitAll() // Allow login and registration without authentication
                 .anyRequest().authenticated() // Require authentication for all other requests
             )
             .formLogin(form -> form

@@ -1,7 +1,12 @@
 package entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -11,12 +16,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import model.User;
 
 
 @Entity
 @Table(name = "Users")
-public class UserEntity implements User{
+public class UserEntity implements UserDetails {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,7 +45,6 @@ public class UserEntity implements User{
         // this.createdAt = new java.util.Date();
     }
 
-    @Override
     public void setUserId(Long userId) {
         this.user_id = userId;
     }
@@ -51,18 +54,33 @@ public class UserEntity implements User{
     }
 
     @Override
-    public String getEmail() {
+    public String getUsername() {
         return email;
     }
 
+    public void setPassword(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+    
     @Override
-    public String getPasswordHash() {
+    public String getPassword() {
         return passwordHash;
     }
 
     public List<VehicleEntity> getVehicles() {
         return vehicles;
     }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+    }
+
+    // Standard UserDetails overrides (return true for simplicity now)
+    @Override public boolean isAccountNonExpired() { return true; }
+    @Override public boolean isAccountNonLocked() { return true; }
+    @Override public boolean isCredentialsNonExpired() { return true; }
+    @Override public boolean isEnabled() { return true; }
 
     // @Override
     // public java.util.Date getCreatedAt() {

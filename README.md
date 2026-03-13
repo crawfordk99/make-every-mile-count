@@ -22,6 +22,11 @@ they deliver. The decision to take certain delivery trips can be more complicate
 - [Apache POI](https://poi.apache.org/)
 - [EIA API](https://www.eia.gov/opendata/)
 - [Flyway with Maven](https://documentation.red-gate.com/fd/quickstart-maven-184127578.html)
+- [Spring Security](https://spring.io/projects/spring-security)
+
+## Data Flow
+
+HTML - JavaScript- RestControllers/Spring Security - Services - JavaScript - HTML
 
 ## Future work
 
@@ -37,5 +42,3 @@ of your mileage.
 - This is not tax/financial advice. Please consult a tax professional for your specific situation.
 - This is a personal project and not affiliated with any rideshare/delivery companies.
 - If you have suggestions or want to contribute, please reach out!
-- Run locally on command line with 'mvn clean compile
-mvn exec:java -Dexec.mainClass=ui.Main'
