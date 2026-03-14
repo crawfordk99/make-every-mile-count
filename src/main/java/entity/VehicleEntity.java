@@ -80,6 +80,10 @@ public class VehicleEntity implements Vehicle{
         return cityMpg;
     }
 
+    public void setOwnerId(Long ownerId) {
+        this.ownerId.setUserId(ownerId);
+    }
+
     @Override
     public Long getOwnerId() {
         return ownerId.getUserId();
