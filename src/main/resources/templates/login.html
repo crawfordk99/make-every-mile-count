@@ -11,7 +11,7 @@
         <ul>
             <li><a href="/">Home</a></li>
             <li><a href="/calculate">Calculate</a></li>
-            <li><a href="/saved">Saved Calculations</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
             <li><a href="/login">Login</a></li>
         </ul>
     </nav>
@@ -83,17 +83,19 @@
                         // Spring Security requires a CSRF token for POST requests
                         // [header]: token
                     },
-                    body: formData
+                    body: formData,
+                    redirect: 'follow' 
                 });
 
-                console.log(response.status + " " + response.statusText);
-
-                if (response.redirected) {
-                    // Success! Spring redirected us to /saved
-                    window.location.href = "/saved";
+                // console.log(response.status + " " + response.statusText);
+                if (response.ok) {
+                    // Login successful, redirect to the saved calculations page
+                    window.location.href = '/saved';
+        
                 } else if (response.status === 401) {
                     alert("Invalid email or password.");
                 }
+
             } catch (error) {
                 console.error("Login failed", error);
             }
@@ -119,14 +121,15 @@
             const email = document.getElementById('signupEmail').value;
             const password = document.getElementById('signupPassword').value;
 
-            const signupData = new URLSearchParams();
-            signupData.append('email', email);
-            signupData.append('password', password);
+            const formData = {
+                email: email,
+                password: password
+            };
 
             const response = await fetch('/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: signupData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
             });
 
             if (response.ok) {

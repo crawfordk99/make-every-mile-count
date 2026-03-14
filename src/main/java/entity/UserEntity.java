@@ -50,25 +50,29 @@ public class UserEntity implements UserDetails {
     }
 
     public Long getUserId() {
-        return user_id;
+        return this.user_id;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     @Override
     public String getUsername() {
-        return email;
+        return this.email;
     }
 
     public void setPassword(String passwordHash) {
         this.passwordHash = passwordHash;
     }
-    
+
     @Override
     public String getPassword() {
-        return passwordHash;
+        return this.passwordHash;
     }
 
     public List<VehicleEntity> getVehicles() {
-        return vehicles;
+        return this.vehicles;
     }
 
     @Override

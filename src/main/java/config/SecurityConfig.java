@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -22,7 +24,13 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/login")
                 .usernameParameter("email")
-                .defaultSuccessUrl("/saved", true)
+                .defaultSuccessUrl("/dashboard", true)
+                .successHandler((request, response, authentication) -> { // Return 200 on success
+                    response.setStatus(HttpServletResponse.SC_OK); 
+                })
+                .failureHandler((request, response, exception) -> { // Return 401 on failure
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); 
+                }) 
                 .permitAll() // Configure form login
             );
         return http.build();

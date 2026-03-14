@@ -28,9 +28,9 @@ public class ViewController {
         return "login";
     }
 
-    @GetMapping("/saved")
-    public String saved(Model model) {
-        model.addAttribute("title", "Saved Vehicle Information");
-        return "saved";
+    @GetMapping("/dashboard")
+    public String dashboard(Model model) {
+        model.addAttribute("title", "Dashboard");
+        return "dashboard";
     }
 }

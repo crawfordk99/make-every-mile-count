@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Saved Calculations - Make Every Mile Count</title>
+    <title>Dashboard - Make Every Mile Count</title>
     <link rel="stylesheet" th:href="@{/styles/main.css}" />
 </head>
 <body>
@@ -11,17 +11,13 @@
         <ul>
             <li><a href="/">Home</a></li>
             <li><a href="/calculate">Calculate</a></li>
-            <li><a href="/saved">Saved Calculations</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
             <li><a href="/login">Login</a></li>
         </ul>
     </nav>
     <div class="container">
         <div class="card">
-            <h1>Saved Calculations</h1>
-            <div class="alert alert-info">
-                You must be logged in to view and save your calculations.
-            </div>
-            
+            <h1>Vehicle Information</h1>
             <div class="empty-state">
                 <p>No saved calculations found. <a href="/calculate">Start calculating</a> to save your first calculation!</p>
             </div>
