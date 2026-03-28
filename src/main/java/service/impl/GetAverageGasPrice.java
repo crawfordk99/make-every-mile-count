@@ -60,8 +60,8 @@ public class GetAverageGasPrice implements GasPriceService
         urlBuilder.append("&api_key=").append(URLEncoder.encode(eiaApiKey, StandardCharsets.UTF_8));
 
         String url = urlBuilder.toString();
-        System.out.println("Calling EIA API...");
-        System.out.println("URL: " + url);
+        // System.out.println("Calling EIA API...");
+        // System.out.println("URL: " + url);
 
         // HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()

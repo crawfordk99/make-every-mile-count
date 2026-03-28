@@ -2,7 +2,7 @@ package model;
 
 public class FuelCosts
 {
-    private double _averageGasPrice;
+    private final double _averageGasPrice;
 
     public FuelCosts(double averageGasPrice)
     {

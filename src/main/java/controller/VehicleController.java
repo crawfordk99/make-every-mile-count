@@ -1,48 +1,56 @@
 package controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import entity.UserEntity;
 import entity.VehicleEntity;
+import model.CalculateResponse;
+import model.VehicleRequest;
 import repository.VehicleRepository;
-import service.impl.GetCityMPG;
+import service.impl.MileageCalculator;
+import service.impl.VehicleService;
 
 @RestController
 public class VehicleController {
     private final VehicleRepository _vehicleRepository;
-    private final GetCityMPG _getCityMPG;
+    private final VehicleService _vehicleService;
+    private final MileageCalculator _calculator;   
     
-    public VehicleController(VehicleRepository vehicleRepository, GetCityMPG getCityMPG) {
+    public VehicleController(VehicleRepository vehicleRepository, VehicleService vehicleService, MileageCalculator mileageCalculator) {
+         this._calculator = mileageCalculator;
         this._vehicleRepository = vehicleRepository;
-        this._getCityMPG = getCityMPG;
+        this._vehicleService = vehicleService;
+
     }
 
-    @PostMapping("/api/vehicle/save")
-    public ResponseEntity<String> saveVehicle(@AuthenticationPrincipal UserEntity currentUser, @RequestBody java.util.Map<String, String> request) throws Exception{
-        if (currentUser == null) { // This should never happen if Spring Security is configured correctly, but we check just in case
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    @GetMapping("/api/vehicles")
+    public ResponseEntity<?> getVehicles(@AuthenticationPrincipal UserEntity currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(401).body("User not logged in");
         }
+        return ResponseEntity.ok(currentUser.getVehicles());
+    }
 
-        String make = request.get("make");
-        String model = request.get("model");
-        String year = request.get("year");
-        String subModel = request.get("subModel");
+    @PostMapping("/api/vehicle/save-calculate")
+    public ResponseEntity<?> saveVehicle(@AuthenticationPrincipal UserEntity currentUser, @RequestBody VehicleRequest request) throws Exception{
+        if (currentUser == null) {
+            System.out.println("DEBUG: User is NULL - Session not persisting!");
+            return ResponseEntity.status(401).body("User not logged in");
+        }
+        System.out.println("DEBUG: Logged in as: " + currentUser.getUsername());
         
+       
+        VehicleEntity savedVehicle = _vehicleService.saveNewVehicle(request, currentUser);
+        _vehicleRepository.save(savedVehicle);
+        request.setVehicleId(savedVehicle.getVehicleId()); // Set the generated ID back to the request for calculation
+    
 
-        double cityMpg = _getCityMPG.getMpg(make, model, year, subModel);
-        if (cityMpg == 0.0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid vehicle data or MPG not found");
-        }
-
-        VehicleEntity vehicleEntity = new VehicleEntity(make, model, year, subModel, cityMpg, currentUser.getUserId());
-        _vehicleRepository.save(vehicleEntity);
-
-
-        return ResponseEntity.ok("Vehicle saved successfully");
+        CalculateResponse calculateResponse = _calculator.calculateCostPerMile(request, currentUser);
+        return ResponseEntity.ok(calculateResponse);
     }
 }

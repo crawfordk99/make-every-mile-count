@@ -1,6 +1,7 @@
 package repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -15,5 +16,6 @@ import entity.VehicleEntity;
 
 @Repository
 public interface VehicleRepository extends JpaRepository<VehicleEntity, String>{
-    List<VehicleEntity> findByOwnerId(UserEntity ownerId);
+    List<VehicleEntity> findAllByOwnerId(UserEntity owner);
+    Optional<VehicleEntity> findByVehicleIdAndOwnerId(Long id, UserEntity owner);
 }

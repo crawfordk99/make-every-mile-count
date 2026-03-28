@@ -1,5 +1,7 @@
 package model;
 
+import entity.UserEntity;
+
 public interface Vehicle
 {
     public String getMake();
@@ -7,6 +9,6 @@ public interface Vehicle
     public String getYear();
     public String getSubModel();
     public double getCityMpg();
-    public Long getOwnerId();
+    public UserEntity getOwnerId();
 }
 

@@ -39,7 +39,7 @@ public class RegistrationController {
         userEntity.setPassword(_passwordEncoder.encode(userEntity.getPassword()));
 
         // 3. Save
-        UserEntity savedUser = _userRepository.save(userEntity);
+        _userRepository.save(userEntity);
         // System.out.println("User saved with ID: " + savedUser.getUserId());
 
         return ResponseEntity.ok("User registered successfully");

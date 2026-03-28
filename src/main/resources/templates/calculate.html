@@ -11,7 +11,7 @@
         <ul>
             <li><a href="/">Home</a></li>
             <li><a href="/calculate">Calculate</a></li>
-            <li><a href="/dashboard">Dashboard/a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
             <li><a href="/login">Login</a></li>
         </ul>
     </nav>
@@ -78,7 +78,17 @@
                         </select>
                     </div>
                 </div>
-                <button type="submit">Calculate</button>
+                <div class = "button-group">
+                    <button type="button" onclick="handleAction('calculate')">Calculate Only</button>
+
+                    <div sec:authorize="isAuthenticated()" style="display:inline;">
+                        <button type="button" onclick="handleAction('save')">Save & Calculate</button>
+                    </div>
+
+                    <div sec:authorize="isAnonymous()" style="display:inline;">
+                        <a href="/login" class="btn-link">Login to save this vehicle</a>
+                </div>
+                
             </form>
             <div id="result" class="result">
                 <h2>Results</h2>
@@ -90,8 +100,8 @@
     </div>
 
     <script>
-        document.getElementById('calculateForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        function handleAction(actionType) {
+            event.preventDefault();
             
             const make = document.getElementById('make').value;
             const model = document.getElementById('model').value;
@@ -99,6 +109,8 @@
             const subModel = document.getElementById('subModel').value;
             const region = document.getElementById('region').value;
             const fuelType = document.getElementById('fuelType').value;
+
+            const url = actionType === 'save' ? '/api/vehicle/save-calculate' : '/api/calculate';
 
             try {
                 // For now, just show placeholder results
@@ -108,7 +120,7 @@
                 document.getElementById('resultCost').textContent = 'Fetching...';
                 document.getElementById('result').classList.add('show');
 
-                fetch('/api/calculate', {
+                fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -135,7 +147,7 @@
             } catch (error) {
                 alert('Error: ' + error.message);
             }
-        });
+        };
     </script>
 </body>
 </html>

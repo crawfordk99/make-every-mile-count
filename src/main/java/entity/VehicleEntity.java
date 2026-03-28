@@ -2,6 +2,7 @@ package entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,26 +34,33 @@ public class VehicleEntity implements Vehicle{
     private double cityMpg = 20.0;
 
     
-    @ManyToOne
-    @JoinColumn(name = "owner_id", referencedColumnName = "user_id")
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name = "userId", nullable = false)
     private UserEntity ownerId;
 
     public VehicleEntity() {
         // Default constructor for JPA
     }
 
-    public VehicleEntity(String make, String model, String year, String subModel, double cityMpg, Long ownerId) {
+    public VehicleEntity(String make, String model, String year, String subModel, double cityMpg, UserEntity ownerId) {
         this.make = make;
         this.model = model;
         this.year = year;
         this.subModel = subModel;
         this.cityMpg = cityMpg;
-        this.ownerId = new UserEntity();
-        this.ownerId.setUserId(ownerId);
+        this.ownerId = ownerId;
     }   
+
+    public void setVehicleId(Long vehicleId) {
+        this.vehicleId = vehicleId;
+    }
 
     public Long getVehicleId() {
         return vehicleId;
+    }
+
+    public void setMake(String make) {
+        this.make = make;
     }
 
     @Override
@@ -60,9 +68,17 @@ public class VehicleEntity implements Vehicle{
         return make;   
     }
 
+    public void setModel(String model) {
+        this.model = model;
+    }
+
     @Override
     public String getModel() {
         return model;
+    }
+
+    public void setYear(String year) {
+        this.year = year;
     }
 
     @Override
@@ -70,9 +86,17 @@ public class VehicleEntity implements Vehicle{
         return year;
     }
 
+    public void setSubModel(String subModel) {
+        this.subModel = subModel;
+    }
+
     @Override
     public String getSubModel() {
         return subModel;
+    }
+
+    public void setCityMpg(double cityMpg) {
+        this.cityMpg = cityMpg;
     }
 
     @Override
@@ -80,13 +104,14 @@ public class VehicleEntity implements Vehicle{
         return cityMpg;
     }
 
-    public void setOwnerId(Long ownerId) {
-        this.ownerId.setUserId(ownerId);
+
+    public void setOwnerId(UserEntity ownerId) {
+        this.ownerId = ownerId;
     }
 
     @Override
-    public Long getOwnerId() {
-        return ownerId.getUserId();
+    public UserEntity getOwnerId() {
+        return ownerId;
     }
 
 }

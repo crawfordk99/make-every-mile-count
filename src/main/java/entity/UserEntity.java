@@ -24,7 +24,7 @@ public class UserEntity implements UserDetails {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long user_id;
+    private Long userId;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -46,11 +46,11 @@ public class UserEntity implements UserDetails {
     }
 
     public void setUserId(Long userId) {
-        this.user_id = userId;
+        this.userId = userId;
     }
 
     public Long getUserId() {
-        return this.user_id;
+        return this.userId;
     }
 
     public void setEmail(String email) {

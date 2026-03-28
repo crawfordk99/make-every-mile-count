@@ -25,11 +25,7 @@ public class UserAuthentication implements UserDetailsService {
         UserEntity userEntity = _userRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
         
-            return org.springframework.security.core.userdetails.User.builder()
-                .username(userEntity.getUsername())
-                .password(userEntity.getPassword())
-                .roles("USER") // You can customize roles as needed
-                .build();
+            return userEntity;
         
     }
 }
