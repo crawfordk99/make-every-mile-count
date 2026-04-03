@@ -8,6 +8,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,7 +35,8 @@ public class UserEntity implements UserDetails {
     private String passwordHash;
 
     @OneToMany(mappedBy = "ownerId", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<VehicleEntity> vehicles = new ArrayList<>();
+    @JsonIgnore
+    private final List<VehicleEntity> vehicles = new ArrayList<>();
 
     public UserEntity() {
         // Default constructor for JPA
@@ -72,6 +75,7 @@ public class UserEntity implements UserDetails {
     }
 
     public List<VehicleEntity> getVehicles() {
+        System.out.println("Getting vehicles for user: " + this.email + ", found: " + this.vehicles.size());
         return this.vehicles;
     }
 

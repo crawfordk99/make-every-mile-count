@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,26 +19,71 @@
     <div class="container">
         <div class="card">
             <h1>Vehicle Information</h1>
-            <div class="empty-state">
-                <p>No saved calculations found. <a href="/calculate">Start calculating</a> to save your first calculation!</p>
-            </div>
-
-            <!-- Placeholder table (will be populated once authentication is added) -->
-            <table style="display: none;" id="calculationsTable">
-                <thead>
-                    <tr>
-                        <th>Vehicle</th>
-                        <th>Region</th>
-                        <th>Cost Per Mile</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- Table rows will be inserted here -->
-                </tbody>
-            </table>
+            <sec:authorize="isAuthenticated()">
+                <table style="display: none;" id="calculationsTable">
+                    <thead>
+                        <tr>
+                            <th>Make</th>
+                            <th>Model</th>
+                            <th>Year</th>
+                            <th>Sub Model</th>
+                            <th>City MPG</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        
+                    </tbody>
+                </table>
+            </sec:authorize>
         </div>
     </div>
+    <script>
+        function populateTable(vehicleData) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            vehicleData.forEach(vehicle => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${vehicle.make}</td>
+                    <td>${vehicle.model}</td>
+                    <td>${vehicle.year}</td>
+                    <td>${vehicle.subModel}</td>
+                    <td>${vehicle.cityMpg}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            document.getElementById('calculationsTable').style.display = 'table';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const tableBody = document.getElementById('tableBody');
+            const tableElement = document.getElementById('calculationsTable');
+            fetch('/api/vehicles')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        populateTable(data);
+                    }
+                    else {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `<td colspan="5">
+                            No vehicle data available. 
+                            <a href="/calculate">Start Calculating!</a>
+                            </td>`;
+                        tableBody.appendChild(row);
+                        tableElement.style.display = 'table';
+                    }
+                })
+                .catch(error => { 
+                    console.error('Error fetching vehicle data:', error)
+                    tableBody.innerHTML = '<tr><td colspan="5">Error loading data.</td></tr>';
+                    tableElement.style.display = 'table';
+                });
+                
+        })
+
+    </script>
 </body>
 </html>

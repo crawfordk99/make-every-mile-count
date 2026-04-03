@@ -26,7 +26,10 @@ they deliver. The decision to take certain delivery trips can be more complicate
 
 ## Data Flow
 
-HTML - JavaScript- RestControllers/Spring Security - Services - JavaScript - HTML
+HTML - JavaScript- RestControllers/Spring Security - Services - Database/External APIs - Services - Data Transfer Objects - RestControllers - JavaScript - HTML
+
+The frontend html receives the information from the user, gives it to JavaScript. JavaScript makes calls to the backend API endpoints, the RestControllers. The information is then transferred to the necessary backend spring services. The spring services handle the calculating, making external api calls, and communicating to the database where necessary. The database/external apis send the necessary information back to the services. The services handle calculating/saving/loading, and then Spring likes to use DTOs (Data Transfer Objects), classes that specifically handle what needs to be sent back to the frontend through the 
+Rest Controllers 
 
 ## Future work
 

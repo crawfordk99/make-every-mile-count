@@ -11,13 +11,14 @@ public class VehicleRequest {
 
     public VehicleRequest() {}
 
-    public VehicleRequest(String make, String model, String year, String subModel, String region, String fuelType) {
+    public VehicleRequest(String make, String model, String year, String subModel, String region, String fuelType, Long vehicleId) {
         this._make = make;
         this._model = model;
         this._year = year;
         this._subModel = subModel;
         this._region = region;
         this._fuelType = fuelType;
+        this._vehicleId = vehicleId;
     }
 
     public String getMake() {

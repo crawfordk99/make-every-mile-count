@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 import model.MaintenanceCosts;
 import service.api.CityMpgService;
 import service.api.GasPriceService;
-import service.impl.MileageCalculator;
+import service.impl.CostPerMileCalculator;
 
 class MileageCalculatorTest {
 

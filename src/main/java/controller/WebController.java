@@ -5,21 +5,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import model.CalculateResponse;
-import service.impl.MileageCalculator;
 import model.VehicleRequest;
+import service.impl.CostPerMileCalculator;
 
 @RestController
 public class WebController {
-    private final MileageCalculator _mileageCalculator;
+    private final CostPerMileCalculator _costCalculator;
 
-    public WebController(MileageCalculator mileageCalculator) {
-        this._mileageCalculator = mileageCalculator;
+    public WebController(CostPerMileCalculator costCalculator) {
+        this._costCalculator = costCalculator;
     }
 
     @PostMapping("/api/calculate")
     public CalculateResponse calculateCostPerMileApi(@RequestBody VehicleRequest request) throws Exception {
         
-        CalculateResponse response = _mileageCalculator.calculateCostPerMile(request, null);
+        CalculateResponse response = _costCalculator.calculateCostPerMile(request, null);
 
         return response;
     }

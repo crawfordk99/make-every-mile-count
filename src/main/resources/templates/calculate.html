@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en"
+xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,8 +19,18 @@
     <div class="container">
         <div class="card">
             <h1>Calculate Fuel Cost Per Mile</h1>
+            <div sec:authorize="isAuthenticated()" class="form-group mb-4">
+                <label for="vehicleSelect" class="form-label"><strong>Choose from your Garage:</strong></label>
+                <select id="vehicleSelect" class="form-select" onchange="preFillVehicleData()">
+                    <option value="">-- Add a New Vehicle --</option>
+                    </select>
+                <small class="text-muted">Pick a saved vehicle to skip the API lookup.</small>
+            </div>
+
+            <hr sec:authorize="isAuthenticated()">
             <form id="calculateForm">
                 <div class="form-row">
+                    <input type="hidden" id="vehicleId" name="vehicleId"> <!-- Hidden field to store vehicle ID for edits -->
                     <div>
                         <label for="make">Make</label>
                         <input type="text" id="make" name="make" placeholder="e.g., Toyota" required>
@@ -38,6 +49,7 @@
                         <label for="subModel">Sub Model (Optional)</label>
                         <input type="text" id="subModel" name="subModel" placeholder="e.g., SE">
                     </div>
+                    
                 </div>
                 <div class="form-row">
                     <div>
@@ -103,12 +115,15 @@
         function handleAction(actionType) {
             event.preventDefault();
             
-            const make = document.getElementById('make').value;
-            const model = document.getElementById('model').value;
-            const year = document.getElementById('year').value;
-            const subModel = document.getElementById('subModel').value;
-            const region = document.getElementById('region').value;
-            const fuelType = document.getElementById('fuelType').value;
+            const payload = {
+                vehicleId: document.getElementById('vehicleId') ? document.getElementById('vehicleId').value : null,
+                make: document.getElementById('make').value,
+                model: document.getElementById('model').value,
+                year: document.getElementById('year').value,
+                subModel: document.getElementById('subModel').value,
+                region: document.getElementById('region').value,
+                fuelType: document.getElementById('fuelType').value
+            };
 
             const url = actionType === 'save' ? '/api/vehicle/save-calculate' : '/api/calculate';
 
@@ -125,7 +140,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ make, model, year, subModel, region, fuelType })
+                    body: JSON.stringify(payload)
                 })
                 .then(response => {
                     if (!response.ok) {
@@ -148,6 +163,59 @@
                 alert('Error: ' + error.message);
             }
         };
+
+        // 1. Load the vehicles when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        fetch('/api/vehicles')
+            .then(response => response.json())
+            .then(vehicles => {
+                // Defensive check: ensure 'vehicles' is an array
+                if (!Array.isArray(vehicles)) {
+                    console.error("Expected an array but got:", vehicles);
+                    return;
+                }
+                handleSelectedVehicle(vehicles);
+            });
+    });
+
+    function handleSelectedVehicle(vehicleData) {
+        const select = document.getElementById('vehicleSelect');
+        vehicleData.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v.vehicleId;
+            opt.textContent = `${v.year} ${v.make} ${v.model} ${v.subModel ? '(' + v.subModel + ')' : ''}`;
+            opt.dataset.make = v.make;
+            opt.dataset.model = v.model;
+            opt.dataset.year = v.year;
+            opt.dataset.subModel = v.subModel || "";
+            select.appendChild(opt);
+        });
+    }
+
+    // 2. Pre-fill the form when an option is selected
+    function preFillVehicleData() {
+        const select = document.getElementById('vehicleSelect');
+        const selectedOption = select.options[select.selectedIndex];
+
+
+
+        if (select.value === "") {
+            // Clear fields for "Add New"
+            document.getElementById('vehicleId').value = "";
+            document.getElementById('make').value = "";
+            document.getElementById('model').value = "";
+            document.getElementById('year').value = "";
+            document.getElementById('subModel').value = "";
+        } else {
+            // Fill fields with saved data
+            document.getElementById('vehicleId').value = select.value;
+            document.getElementById('make').value = selectedOption.dataset.make;
+            document.getElementById('model').value = selectedOption.dataset.model;
+            document.getElementById('year').value = selectedOption.dataset.year;
+            document.getElementById('subModel').value = selectedOption.dataset.subModel || "";
+
+        }
+    }
     </script>
 </body>
 </html>

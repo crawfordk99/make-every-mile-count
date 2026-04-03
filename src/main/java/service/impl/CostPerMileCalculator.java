@@ -18,7 +18,7 @@ import service.api.GasPriceService;
  * Made test-friendly so we can unit-test logic without calling external APIs.
  */
 @Service
-public class MileageCalculator {
+public class CostPerMileCalculator {
 
     private final CityMpgService _mpgService;
     private final GasPriceService _gasService;
@@ -26,7 +26,7 @@ public class MileageCalculator {
 
     
 
-    public MileageCalculator(CityMpgService mpgService, GasPriceService gasService, VehicleRepository vehicleRepo) {
+    public CostPerMileCalculator(CityMpgService mpgService, GasPriceService gasService, VehicleRepository vehicleRepo) {
         this._mpgService = mpgService;
         this._gasService = gasService;
         this._vehicleRepository = vehicleRepo;
@@ -41,14 +41,15 @@ public class MileageCalculator {
         double gasPrice = _gasService.getPrice(request.getRegion(), request.getFuelType());
         if (gasPrice == 0.0) return new CalculateResponse(0.0, 0.0, 0.0);
         if (user != null && request.getVehicleId() != null) {
-        // Logged in: Pull the MPG from the database
-        VehicleEntity savedVehicle = _vehicleRepository.findByVehicleIdAndOwnerId(request.getVehicleId(), user)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vehicle not found for user"));
-        mpg = savedVehicle.getCityMpg();
-    } else {
-        // Guest: Call the external API using form data
-        mpg = _mpgService.getMpg(request.getMake(), request.getModel(), request.getYear(), request.getSubModel());
-    }
+            // Logged in: Pull the MPG from the database
+            VehicleEntity savedVehicle = _vehicleRepository.findByVehicleIdAndOwnerId(request.getVehicleId(), user)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vehicle not found for user"));
+            mpg = savedVehicle.getCityMpg();
+        } else {
+            // Guest: Call the external API using form data
+            mpg = _mpgService.getMpg(request.getMake(), request.getModel(), request.getYear(), request.getSubModel());
+        }
+        if (mpg == 0.0) return new CalculateResponse(0.0, 0.0, 0.0);
 
         double costPerMile = new FuelCosts(gasPrice).costPerMile(mpg);
 

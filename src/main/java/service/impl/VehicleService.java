@@ -1,20 +1,30 @@
 package service.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import entity.UserEntity;
 import entity.VehicleEntity;
 import model.VehicleRequest;
+import repository.VehicleRepository;
 import service.api.CityMpgService;
 
 @Service
 public class VehicleService 
 {
     private final CityMpgService _cityMpgService;
+    private final VehicleRepository _vehicleRepository;
 
-    public VehicleService(CityMpgService cityMpgService) {
+    public VehicleService(CityMpgService cityMpgService, VehicleRepository vehicleRepository) {
         this._cityMpgService = cityMpgService;
+        this._vehicleRepository = vehicleRepository;
+    }
 
+    @Transactional(readOnly = true)
+    public List<VehicleEntity> getVehiclesForUser(UserEntity user) {
+        return _vehicleRepository.findAllByOwnerId(user);
     }
 
     public VehicleEntity saveNewVehicle(VehicleRequest request, UserEntity user) throws Exception{
