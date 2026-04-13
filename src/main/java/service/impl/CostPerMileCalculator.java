@@ -35,67 +35,41 @@ public class CostPerMileCalculator {
     /**
      * Calculate cost-per-mile given services and vehicle info.
      * Returns 0.0 when MPG or gas price cannot be obtained.
+     * Using waterfall logic: if user provides MPG and/or Gas Price, those are used;
+     * otherwise, if user is logged in and provides vehicleId, MPG is pulled from the database;
+     * lastly, MPG and gas price are pulled from external APIs based on form data.
      */
     public CalculateResponse calculateCostPerMile(VehicleRequest request, UserEntity user) throws Exception {
         double mpg;
-        double gasPrice = _gasService.getPrice(request.getRegion(), request.getFuelType());
-        if (gasPrice == 0.0) return new CalculateResponse(0.0, 0.0, 0.0);
-        if (user != null && request.getVehicleId() != null) {
-            // Logged in: Pull the MPG from the database
-            VehicleEntity savedVehicle = _vehicleRepository.findByVehicleIdAndOwnerId(request.getVehicleId(), user)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vehicle not found for user"));
-            mpg = savedVehicle.getCityMpg();
+        double gasPrice;
+
+        if (request.getManualGasPrice() != null) {
+            gasPrice = request.getManualGasPrice();
         } else {
-            // Guest: Call the external API using form data
-            mpg = _mpgService.getMpg(request.getMake(), request.getModel(), request.getYear(), request.getSubModel());
+            gasPrice = _gasService.getPrice(request.getRegion(), request.getFuelType());
         }
-        if (mpg == 0.0) return new CalculateResponse(0.0, 0.0, 0.0);
+
+        if (request.getManualMpg() != null) {
+            mpg = request.getManualMpg();
+        } else {
+            if (user != null && request.getVehicleId() != null) {
+                // Logged in: Pull the MPG from the database
+                VehicleEntity savedVehicle = _vehicleRepository.findByVehicleIdAndOwnerId(request.getVehicleId(), user)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vehicle not found for user"));
+                
+                mpg = savedVehicle.getCityMpg();
+            } else {
+                // Guest: Call the external API using form data
+                mpg = _mpgService.getMpg(request.getMake(), request.getModel(), request.getYear(), request.getSubModel());
+            }
+        }
+
+        
+        if (mpg == 0.0 || gasPrice == 0.0) return new CalculateResponse(0.0, 0.0, 0.0);
 
         double costPerMile = new FuelCosts(gasPrice).costPerMile(mpg);
 
         return new CalculateResponse(mpg, gasPrice, costPerMile);
     }
 
-   
-    /** 
-     * Overload for when caller is not logged in and doesn't have a VehicleEntity; this will be used by the WebController
-     */
-    // public double calculateCostPerMile(String make, String model, String year, String submodel, String region, String fuelType) throws Exception {
-    //     double mpg = _mpgService.getMpg(make, model, year, submodel);
-    //     if (mpg == 0.0) return 0.0;
-
-    //     double gasPrice = _gasService.getPrice(region, fuelType);
-    //     if (gasPrice == 0.0) return 0.0;
-
-    //     VehicleEntity v = new VehicleEntity(make, model, year, submodel, mpg, null);
-    //     FuelCosts fc = new FuelCosts(gasPrice);
-    //     return fc.costPerMile(v);
-    // }
-    /** 
-     * Overload for when caller already has city MPG and just wants to calculate cost-per-mile; 
-     * this will be used by the WebController when calculating costs, to avoid redundant API calls
-        */
-    // public double calculateCostPerMile(double cityMpg, String region, String fuelType) throws Exception {
-    //     double mpg = cityMpg;
-    //     if (mpg == 0.0) return 0.0;
-
-    //     double gasPrice = _gasService.getPrice(region, fuelType);
-    //     if (gasPrice == 0.0) return 0.0;
-
-    
-    //     FuelCosts fc = new FuelCosts(gasPrice);
-    //     return fc.costPerMile(mpg);
-    // }
-
-    /**
-     * Calculate cost-per-mile including optional maintenance costs (e.g., oil changes).
-     * If `maintenance` is null, returns gas-only cost-per-mile.
-     */
-    // public double calculateCostPerMile(String make, String model, String year, String submodel, String region, String fuelType, 
-    //                                           MaintenanceCosts maintenance) throws Exception {
-    //     double base = calculateCostPerMile(make, model, year, submodel, region, fuelType);
-    //     if (base == 0.0) return 0.0;
-    //     if (maintenance == null) return base;
-    //     return base + maintenance.oilChangeCostPerMile();
-    // }
 }

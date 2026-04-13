@@ -8,10 +8,12 @@ public class VehicleRequest {
     private String _region;
     private String _fuelType;
     private Long _vehicleId;
+    private Double _manualMpg; // Optional field for when the caller already has the MPG and just wants to calculate cost-per-mile
+    private Double _manualGasPrice; // Optional field for when the caller already has the gas price and just wants to calculate cost-per-mile
 
     public VehicleRequest() {}
 
-    public VehicleRequest(String make, String model, String year, String subModel, String region, String fuelType, Long vehicleId) {
+    public VehicleRequest(String make, String model, String year, String subModel, String region, String fuelType, Long vehicleId, Double manualMpg, Double manualGasPrice) {
         this._make = make;
         this._model = model;
         this._year = year;
@@ -19,6 +21,8 @@ public class VehicleRequest {
         this._region = region;
         this._fuelType = fuelType;
         this._vehicleId = vehicleId;
+        this._manualMpg = manualMpg;
+        this._manualGasPrice = manualGasPrice;
     }
 
     public String getMake() {
@@ -75,6 +79,22 @@ public class VehicleRequest {
     
     public void setVehicleId(Long vehicleId) {
         this._vehicleId = vehicleId;
+    }
+
+    public Double getManualMpg() {
+        return _manualMpg;
+    }
+
+    public void setManualMpg(Double manualMpg) {
+        this._manualMpg = manualMpg;
+    }
+
+    public Double getManualGasPrice() {
+        return _manualGasPrice;
+    }
+
+    public void setManualGasPrice(Double manualGasPrice) {
+        this._manualGasPrice = manualGasPrice;
     }
 
 }

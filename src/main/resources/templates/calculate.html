@@ -104,9 +104,22 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             </form>
             <div id="result" class="result">
                 <h2>Results</h2>
-                <div class="result-item"><strong>City MPG:</strong> <span id="resultMpg">-</span></div>
-                <div class="result-item"><strong>Gas Price:</strong> <span id="resultPrice">-</span></div>
+
+                <div class="result-item" id = "mpg-container">
+                    <strong>City MPG:</strong> 
+                    <span id="resultMpg">-</span>
+                    <input type="number" id="inputMpg" style="display:none;" step="0.1">
+                    <button onclick="toggleEdit('mpg'); return false;">✏️</button>
+                </div>
+                <div class="result-item" id = "price-container">
+                    <strong>Gas Price:</strong> 
+                    <span id="resultPrice">-</span>
+                    <input type="number" id="inputPrice" style="display:none;" step="0.01">
+                    <button onclick="toggleEdit('price'); return false;">✏️</button>
+                </div>
                 <div class="result-item"><strong>Cost Per Mile:</strong> <span id="resultCost">-</span></div>
+
+                <button id = "recalculateButton" style="display:none;" onclick="handleRecalculate(event)">Update Calculation</button>
             </div>
         </div>
     </div>
@@ -215,6 +228,53 @@ xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
             document.getElementById('subModel').value = selectedOption.dataset.subModel || "";
 
         }
+    }
+
+    function toggleEdit(field) {
+        const span = document.getElementById(`result${field.charAt(0).toUpperCase() + field.slice(1)}`);
+        const input = document.getElementById(`input${field.charAt(0).toUpperCase() + field.slice(1)}`);
+        const recalculateButton = document.getElementById('recalculateButton');
+
+        if (input.style.display === 'none') {
+            // Switch to edit mode
+            input.value = span.textContent.replace(/[^0-9.]/g, ''); // Remove non-numeric characters
+            span.style.display = 'none';
+            input.style.display = 'inline';
+            recalculateButton.style.display = 'inline';
+        } else {
+            // Switch back to display mode
+            span.textContent = field === 'mpg' ? `${input.value} MPG` : `$${parseFloat(input.value).toFixed(2)} per gallon`;
+            input.style.display = 'none';
+            span.style.display = 'inline';
+        }
+    }
+
+    async function handleRecalculate(event) {
+        // This function will be called when the user edits MPG or Gas Price and clicks "Update Calculation"
+        // It should re-submit the form data along with the updated MPG/Gas Price to get a new cost-per-mile calculation
+        // For now, it just shows an alert
+        event.preventDefault();
+        const mpgValue = document.getElementById('inputMpg').value || document.getElementById('resultMpg').innerText;
+        const priceValue = document.getElementById('inputPrice').value || document.getElementById('resultPrice').innerText;
+
+        // 2. Build your VehicleRequest DTO
+        const payload = {
+            vehicleId: document.getElementById('vehicleId').value, 
+            manualMpg: parseFloat(mpgValue),
+            manualGasPrice: parseFloat(priceValue)
+        };
+
+        // 3. POST to your Spring Boot Controller
+        const response = await fetch('/api/calculate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const newCost = await response.json();
+        document.getElementById('resultCost').innerText = `$${newCost.costPerMile.toFixed(3)} per mile`;
+
+        alert('Recalculate with updated MPG and Gas Price (functionality to be implemented)');
     }
     </script>
 </body>
