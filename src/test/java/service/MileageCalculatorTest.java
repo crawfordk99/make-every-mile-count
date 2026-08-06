@@ -5,11 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import model.MaintenanceCosts;
+import model.VehicleRequest;
 import service.api.CityMpgService;
 import service.api.GasPriceService;
 import service.impl.CostPerMileCalculator;
@@ -83,4 +82,27 @@ class MileageCalculatorTest {
 //         verify(mpg).getMpg("Toyota", "Camry", "2018", null);
 //         verify(gas).getPrice("region", "fuelType");
 //     }
+
+    @Test 
+    void calculateCostPerMile_zero_input() throws Exception {
+        CityMpgService mpg = mock(CityMpgService.class);
+        GasPriceService gas = mock(GasPriceService.class);
+        VehicleRequest request = new VehicleRequest();
+
+        request.setMake("Ford");
+        request.setModel("Fiesta");
+        request.setYear("2016");
+        request.setRegion("region");
+        request.setFuelType("fuelType");
+
+        when(mpg.getMpg(anyString(), anyString(), anyString(), any())).thenReturn(0.0);
+        when(gas.getPrice(anyString(), anyString())).thenReturn(0.0);
+
+        CostPerMileCalculator calc = new CostPerMileCalculator(mpg, gas, null);
+        double cost = calc.calculateCostPerMile(request, null).getCostPerMile();
+        assertEquals(0.0, cost, 1e-9);
+
+        verify(mpg).getMpg(anyString(), anyString(), anyString(), any());
+        verify(gas).getPrice(anyString(), anyString());
+    }
 }
